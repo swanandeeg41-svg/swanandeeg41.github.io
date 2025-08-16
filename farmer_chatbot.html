@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<title>Farmer Voice Chatbot</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f2f2f2;
+}
+#chatbox {
+    width: 90%;
+    max-width: 500px;
+    margin: 20px auto;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px gray;
+}
+#messages {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+button {
+    padding: 10px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+
+<h2>शेतीसाठी आवाजावर आधारित चॅटबॉट</h2>
+<div id="chatbox">
+    <div id="messages"></div>
+    <button onclick="startListening()">🎤 प्रश्न विचारा</button>
+</div>
+
+<script>
+let offlineData = {
+    "बियाणे शुद्धीकरण कसे करावे": "बियाणे निवडून स्वच्छ धुऊन वाळवा, नंतर शिफारस केलेल्या रसायनाने प्रक्रिया करा.",
+    "बियाणे प्रक्रिया कशी करावी": "थायरम किंवा कार्बेन्डाझिम सारख्या फंगीसाइडने प्रक्रिया करा.",
+    "सेंद्रिय खत कोणते द्यावे": "गोमूत्र, शेणखत, वर्मी कंपोस्ट वापरा.",
+    "तण नियंत्रण कसे करावे": "पहिले 20-25 दिवस हाताने तण काढा, नंतर शिफारस केलेली तणनाशके वापरा.",
+    "पाणी कधी द्यावे": "भात पिकाला नेहमी 5-7 सेंमी पाणी ठेवा, पाणी कमी होऊ देऊ नका.",
+    "किड नियंत्रण कसे करावे": "किडींची ओळख करून योग्य कीटकनाशक शिफारसीप्रमाणे फवारणी करा.",
+    "रोग नियंत्रण कसे करावे": "रोगाचे लक्षण दिसताच शिफारस केलेली फंगीसाइड फवारणी करा."
+};
+
+function addMessage(sender, text) {
+    let msgBox = document.getElementById("messages");
+    msgBox.innerHTML += `<p><b>${sender}:</b> ${text}</p>`;
+    msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+function startListening() {
+    let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'mr-IN';
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        let userQuery = event.results[0][0].transcript.trim();
+        addMessage("तुम्ही", userQuery);
+
+        if (navigator.onLine) {
+            // Online mode - redirect to Google search
+            let searchUrl = `https://www.google.com/search?q=${encodeURIComponent(userQuery + " भात शेती")}`;
+            addMessage("बॉट", `मी सविस्तर माहिती शोधून देतो... <a href="${searchUrl}" target="_blank">इथे क्लिक करा</a>`);
+        } else {
+            // Offline mode
+            let answer = offlineData[userQuery];
+            if (answer) {
+                addMessage("बॉट", answer);
+            } else {
+                addMessage("बॉट", "माफ करा, हा प्रश्न माझ्याकडे साठवलेला नाही.");
+            }
+        }
+    };
+}
+</script>
+
+</body>
+</html>
